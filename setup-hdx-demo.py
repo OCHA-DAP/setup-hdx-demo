@@ -19,35 +19,45 @@ def clear_datasets (entity):
 
 def reset_group (group):
     """If the group exists, delete all datasets; otherwise, create it."""
+    old_group = None
     try:
-        print("Deleting all datasets in group {} ({}) ...".format(group['name'], group['title']))
-        group = ckan.action.group_show(id=group['id']) # will fail if it doesn't exist
-        clear_datasets(group)
+        # will throw an exception if group doesn't exist
+        old_group = ckan.action.group_show(id=group['id']) # will fail if it doesn't exist
     except:
-        print("Group {} ({}) did not exist: creating an empty version ...".format(group['name'], group['title']))
+        print("Group {} does not exist: creating.".format(group['name']))
         ckan.call_action('group_create', group)
-        print("  ... created new, empty group")
+    else:
+        print("Deleting all datasets in group {}.".format(group['name']))
+        clear_datasets(group)
+        #ckan.call_action('group_update', group)
 
 def reset_user (user):
     """If the user does not exist, create it; otherwise, update."""
+    old_user = None
     try:
+        old_user = ckan.action.user_show(id=user['name'])
         print("Creating or updating {} ({})".format(user['name'], user['fullname']))
-        ckan.call_action('user_create', user)
     except:
-        print("User {} already exists: updating".format(user['name']))
+        print("User {} does not exist: creating.".format(user['name']))
+        ckan.call_action('user_create', user)
+    else:
+        #print("User {} already exists: updating".format(user['name']))
         #ckan.call_action('user_update', user)
+        pass
 
 def reset_organization (org):
     """If the org exists, delete all datasets; otherwise, create it."""
+    old_org = None
     try:
-        print("Deleting all datasets in organization {} ({}) ...".format(org['name'], org['title']))
-        org = ckan.action.organization_show(id=org['name']) # will fail if it doesn't exist
-        clear_datasets(org)
+        # will throw an exception if org doesn't exist
+        old_org = ckan.action.organization_show(id=org['name']) # will fail if it doesn't exist
     except:
-        print("Organization {} ({}) did not exist: creating an empty version ...".format(org['name'], org['title']))
+        print("Organization {} does not exist: creating.".format(org['name']))
         ckan.call_action('organization_create', org)
-        print("  ... created new, empty organization")
-
+    else:
+        print("Deleting all datasets in organization {}.".format(org['name']))
+        clear_datasets(old_org)
+        #ckan.call_action('organization_update', org)
 
 # Reset the Foolandia (foo) demo country
 reset_group({
